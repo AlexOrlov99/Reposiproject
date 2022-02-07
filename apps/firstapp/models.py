@@ -1,5 +1,7 @@
 from django.db import models
-
+from django.core.exceptions import(
+    ValidationError,
+)
 from django.contrib.auth.models import User
 
 class Account(models.Model):
@@ -42,12 +44,12 @@ class Group(models.Model):
         verbose_name_plural = 'Группы'
 
 class Student(models.Model):
-
+    MAX_AGE = 27
     account = models.ForeignKey(
         Account, on_delete=models.CASCADE
     )
     age = models.IntegerField(
-        'Возраст студента'
+        'Возраст студента', 
     )
     gpa = models.FloatField(
         'Средний бал'
@@ -59,6 +61,17 @@ class Student(models.Model):
         return f'Student: {self.account}, {self.age}, \
             {self.gpa}, {self.group.name}'
     
+    def save(self,
+        *args: tuple,
+        **kwargs: dict
+        ) -> None:
+        if self.age > self.MAX_AGE:
+            self.age = self.MAX_AGE
+            raise ValidationError(
+                f'Допустимый восраст : {self.MAX_AGE}'
+            )
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = (
             'account',
