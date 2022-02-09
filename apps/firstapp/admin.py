@@ -4,7 +4,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from . models import Account
 from . models import Group
 from . models import Student
-
+from . models import Professor
 
 class AccountAdmin(admin.ModelAdmin):
     readonly_fields = ()
@@ -67,3 +67,11 @@ class StudentAdmin(admin.ModelAdmin):
 admin.site.register(
     Student, StudentAdmin
     )
+
+
+class ProfessorAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(
+    Professor, ProfessorAdmin
+)
