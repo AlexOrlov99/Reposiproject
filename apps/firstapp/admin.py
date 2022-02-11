@@ -18,28 +18,16 @@ class AccountAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('description',)
         return self.readonly_fields
 
-admin.site.register(
-    Account,AccountAdmin
-)
+
+class GroupAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'Group.datatime_created'
+        'Group.datatime_deleted'
+        )
 
 
 class GroupAdmin(admin.ModelAdmin):
     readonly_fields = ()
-
-    def get_readonly_fields(
-        self,
-        request: WSGIRequest,
-        obj: Optional[Account] = None
-    ) -> tuple:
-        if obj:
-            return self.readonly_fields + ('name',)
-        return self.readonly_fields
-
-
-admin.site.register(
-    Group, GroupAdmin
-    )
-
 
 class StudentAdmin(admin.ModelAdmin):
     readonly_fields = ()
@@ -64,13 +52,20 @@ class StudentAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('age',)
         return self.readonly_fields
 
+class ProfessorAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(
+    Account,AccountAdmin
+)
+
+admin.site.register(
+    Group, GroupAdmin
+    )
+
 admin.site.register(
     Student, StudentAdmin
     )
-
-
-class ProfessorAdmin(admin.ModelAdmin):
-    pass
 
 admin.site.register(
     Professor, ProfessorAdmin

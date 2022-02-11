@@ -1,10 +1,22 @@
-from django.db import models
+from datetime import (
+    datetime,
+)
+
+from django.db import (
+    models,
+)
+# from django.db.models import (
+#     Queryset,
+# )
 from django.core.exceptions import(
     ValidationError,
 )
 from django.contrib.auth.models import User
 
-class Account(models.Model):
+from abstracts.models import AbstarctDateTime
+
+
+class Account(AbstarctDateTime):
 
     ACCOUNT_FULL_NAME_MAX_LENGTH = 20
 
@@ -27,7 +39,8 @@ class Account(models.Model):
         verbose_name = 'Аккаунт'
         verbose_name_plural = 'Аккаунты'
 
-class Group(models.Model):
+
+class Group(AbstarctDateTime):
     GROUP_NAME_MAX_LENGTH = 10
 
     name = models.CharField(
@@ -43,7 +56,8 @@ class Group(models.Model):
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
 
-class Student(models.Model):
+
+class Student(AbstarctDateTime):
     MAX_AGE = 27
     account = models.ForeignKey(
         Account, on_delete=models.CASCADE
@@ -71,6 +85,17 @@ class Student(models.Model):
                 f'Допустимый восраст : {self.MAX_AGE}'
             )
         super().save(*args, **kwargs)
+    
+    def delete(self) -> None:
+        breakpoint()
+
+        datetime_now: datetime = datetime_now()
+
+        self.save(
+            update_fields=['datetmie_deleted']
+        )
+        super().delete()
+
 
     class Meta:
         ordering = (
@@ -82,7 +107,8 @@ class Student(models.Model):
         verbose_name = 'Студент'
         verbose_name_plural = 'Стундеты'
 
-class Professor(models.Model):
+
+class Professor(AbstarctDateTime):
     FULL_NAME_MAX_LENGTH = 20
 
     TOPIC_JAVA = 'java'
@@ -121,7 +147,6 @@ class Professor(models.Model):
     students = models.ManyToManyField(
         Student
     )
-
     def __str__(self) -> str:
         return f'Профессор: {self.full_name}, Топик: {self.topic}'
     

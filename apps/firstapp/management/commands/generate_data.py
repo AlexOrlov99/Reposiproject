@@ -39,6 +39,20 @@ class Command(BaseCommand):
                 name=name
             )
 
+    # def _generate_accounts_and_students(self) -> None:
+    #     """Generate Accounts and Students objs."""
+
+    #     def generate_name(inc: int) -> str:
+    #         return f'Студент {inc}'
+
+    #     inc: int
+    #     for inc in range(20):
+    #         name: str = generate_name(inc)
+    #         Group.objects.create(
+    #             name=name
+    #         )
+
+
     def handle(self, *args: tuple, **kwargs: dict) -> None:
         """Handles data filling."""
 
