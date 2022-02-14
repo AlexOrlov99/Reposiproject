@@ -7,7 +7,11 @@ from . models import Student
 from . models import Professor
 
 class AccountAdmin(admin.ModelAdmin):
-    readonly_fields = ()
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
 
     def get_readonly_fields(
         self,
@@ -21,16 +25,29 @@ class AccountAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'Group.datatime_created'
-        'Group.datatime_deleted'
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
         )
 
-
-class GroupAdmin(admin.ModelAdmin):
-    readonly_fields = ()
-
 class StudentAdmin(admin.ModelAdmin):
-    readonly_fields = ()
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+    list_filter = (
+        'age',
+        'gpa',
+    )
+    searh_filter = (
+        'account__full_name',
+    )
+    list_display = (
+        # 'account__full_name',
+        'age',
+        'gpa',
+    )
     STUDENT_MAX_AGE = 16
 
     def student_age_validation(
@@ -53,7 +70,11 @@ class StudentAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 class ProfessorAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
 
 admin.site.register(
     Account,AccountAdmin

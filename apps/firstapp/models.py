@@ -5,15 +5,23 @@ from datetime import (
 from django.db import (
     models,
 )
-# from django.db.models import (
-#     Queryset,
-# )
+from django.db.models import (
+    QuerySet,
+)
 from django.core.exceptions import(
     ValidationError,
 )
 from django.contrib.auth.models import User
 
 from abstracts.models import AbstarctDateTime
+
+
+class AccountQuerySet(QuerySet):
+    
+    def get_superusers(self) -> QuerySet:
+        return self.filter(
+            user__is_superuser=True
+        )
 
 
 class Account(AbstarctDateTime):
@@ -29,8 +37,11 @@ class Account(AbstarctDateTime):
     )
     description = models.TextField()
 
+    objects = AccountQuerySet().as_manager()
+
     def __str__(self) -> str:
         return f'Account: {self.user.id}  {self.full_name}' 
+    
 
     class Meta:
         ordering = (
@@ -40,12 +51,22 @@ class Account(AbstarctDateTime):
         verbose_name_plural = 'Аккаунты'
 
 
+class GroupQuerySet(QuerySet):
+
+    HIGH_GPA_LEVEL = 4.0
+
+    def get_students_with_high_gpa(self) -> QuerySet:
+        return self.filter(
+            group__student__gpa=self.HIGH_GPA_LEVEL
+        )
+
 class Group(AbstarctDateTime):
     GROUP_NAME_MAX_LENGTH = 10
 
     name = models.CharField(
         max_length = GROUP_NAME_MAX_LENGTH
     )
+    objects = GroupQuerySet().as_manager()
     def __str__(self) -> str:
         return f'Group: {self.name}'
 
@@ -55,6 +76,15 @@ class Group(AbstarctDateTime):
         )
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
+
+
+class StudentQuerySet(QuerySet):
+    ADULT_AGE = 18
+
+    def get_adult_student(self) -> QuerySet:
+        return self.filter(
+            age__gte=self.ADULT_AGE
+        )
 
 
 class Student(AbstarctDateTime):
@@ -71,6 +101,8 @@ class Student(AbstarctDateTime):
     group = models.ForeignKey(
         Group, on_delete=models.PROTECT
     )
+    objects = StudentQuerySet().as_manager()
+
     def __str__(self) -> str:
         return f'Student: {self.account}, {self.age}, \
             {self.gpa}, {self.group.name}'
