@@ -60,6 +60,7 @@ class GroupQuerySet(QuerySet):
             group__student__gpa=self.HIGH_GPA_LEVEL
         )
 
+
 class Group(AbstarctDateTime):
     GROUP_NAME_MAX_LENGTH = 10
 
