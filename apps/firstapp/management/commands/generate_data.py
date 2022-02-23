@@ -1,8 +1,6 @@
 
-import (
-    names,
-    random,
-    )
+import names, random
+
 from typing import Any
 from datetime import datetime
 
@@ -37,6 +35,9 @@ class Command(BaseCommand):
         """Generate Users objs."""
         MAX_SUPERUSER_COUNT = 1
         TOTAL_USERS_COUNT = 500
+
+        def generate_username() -> str:
+
 
         def generate_password() -> str:
             _password_pattern: str = 'abcde12345'

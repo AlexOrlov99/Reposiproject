@@ -1,10 +1,31 @@
 from typing import Optional
+
 from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
+from django.contrib.auth.models import User
+
+
 from . models import Account
 from . models import Group
 from . models import Student
 from . models import Professor
+
+
+# class UserAdmin(admin.ModelAdmin):
+#     redonly_fields = ()
+#     user_fields = ('first_name', 'last_name', 'email', 
+#                         'username', 'is_active', 'is_staff',
+#                         'is_superuser', 'date_joined', 'last_login',)
+                        
+#     def get_readonly_fields(
+#         self,
+#         request: WSGIRequest,
+#         obj: Optional[User] = None
+#     ) -> tuple:
+#         if obj:
+#             return self.readonly_fields + self.user_fields
+#         return self.readonly_fields
+
 
 class AccountAdmin(admin.ModelAdmin):
     readonly_fields = (
@@ -30,6 +51,7 @@ class GroupAdmin(admin.ModelAdmin):
         'datatime_deleted',
         )
 
+
 class StudentAdmin(admin.ModelAdmin):
     readonly_fields = (
         'datatime_created',
@@ -44,7 +66,6 @@ class StudentAdmin(admin.ModelAdmin):
         'account__full_name',
     )
     list_display = (
-        # 'account__full_name',
         'age',
         'gpa',
     )
@@ -69,12 +90,17 @@ class StudentAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('age',)
         return self.readonly_fields
 
+
 class ProfessorAdmin(admin.ModelAdmin):
     readonly_fields = (
         'datatime_created',
         'datatime_updated',
         'datatime_deleted',
         )
+
+# admin.site.register(
+#     User, UserAdmin
+# )
 
 admin.site.register(
     Account,AccountAdmin

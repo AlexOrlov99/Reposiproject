@@ -8,7 +8,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.index_3),
-    # path('admin/', views.index),
     # path('admin/show/', views.index_2),
     path('admin/', views.admin),
     path('show/', views.show),
