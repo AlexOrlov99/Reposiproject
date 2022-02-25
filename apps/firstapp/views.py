@@ -49,13 +49,29 @@ def index_3(request: WSGIRequest) -> HttpResponse:
         context,
     )
 def admin(request: WSGIRequest) -> HttpResponse:
+    context: dict = {
+        'ctx_title': 'Главная страница',
+        'ctx_users': User.objects.all(),
+    }
+    
     return render(
         request,
         'admin.html',
-        context={"users":User.objects.all()}
+        context
     )
-def show(request: WSGIRequest) -> HttpResponse:
+def show(request: WSGIRequest, username: str) -> HttpResponse:
+    user = User.objects.get(username=username)
+    context: dict = {
+        'ctx_title': 'Профиль пользователя',
+        'ctx_user': user,
+    }
     return render(
         request,
         'show.html',
+        context
+    )
+def delete(request: WSGIRequest) -> HttpResponse:
+
+ return HttpResponse(
+        '<h1>Page: Delete</h1>'
     )

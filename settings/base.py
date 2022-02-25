@@ -150,3 +150,20 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+SHELL_PLUS_PRE_IMPORTS = [
+    ('django.db', ('connection', 'reset_queries', 'connections')),
+    ('datetime', ('datetime', 'timedelta', 'date')),
+    ('json', ('loads', 'dumps')),
+]
+SHELL_PLUS_MODEL_ALIASES = {
+    'university': {
+        'Student': 'S',
+        'Account': 'A',
+        'Group': 'G',
+        'Professor': 'P',
+    },
+}
+SHELL_PLUS = 'ipython'
+SHELL_PLUS_PRINT_SQL = True
+SHELL_PLUS_PRINT_SQL_TRUNCATE = 1000

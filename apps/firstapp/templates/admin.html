@@ -14,7 +14,7 @@
     <header></header>
     <main>
         <div class="user__list">
-            {% for user in users %}
+            {% for user in ctx_users %}
 
                 <div class="user__info">
                     <h1>USER</h1>
@@ -24,13 +24,13 @@
                         <br> Role: 
                         <span id="role">{% if user.is_superuser %}Admin{% else %}User{% endif %}</span>
                     </div>
-                    <button class="edit" onclick="location.href = 'show'">Show</button>
-                    <button class="delete">Delete</button>
+                    <a class="edit" href="{% url 'page_show' user.username %}" role="button">Show</a>
+                    <a class="delete" href="{% url 'page_delete' %}" role="button">Delete</a>
                 </div>
 
             {% endfor %}
         </div>
     </main>
-
+        
     <script src="/static/firstapp/js/app.js"></script>
 </body>

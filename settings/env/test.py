@@ -7,7 +7,7 @@ WSGI_APPLICATION = None
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'NAME': 'db_test.sqlite3',
     }
 }
 ALLOWED_HOSTS = [
