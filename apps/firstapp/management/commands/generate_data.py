@@ -56,9 +56,9 @@ class Command(BaseCommand):
             full_name: str = f'{first_name.lower()}.{last_name.lower()}'
             email: str = f'{full_name}@{domain_name}'
             return email
-
-        def generate_superuser(self) -> None:
-
+            
+        user_count = len(user_list)
+        if not User.objects.filter(is_superuser='True').exists()
             User.objects.create(
                 is_superuser='True',
                 is_staff='True',
@@ -69,14 +69,8 @@ class Command(BaseCommand):
                 last_name='Orlov',
                 )
 
-        user_list = User.objects.filter(is_superuser='False')
-        superuser_list = User.objects.filter(is_superuser='True')
-        user_count = len(user_list)
-        superuser_count = len(superuser_list)
-        if superuser_count < MAX_SUPERUSER_COUNT:
-            generate_superuser()
         inc: int
-        for inc in range(TOTAL_USERS_COUNT-superuser_count-user_count):
+        for inc in range(TOTAL_USERS_COUNT-MAX_SUPERUSER_COUNT-user_count):
             first_name: str = names.get_first_name()
             last_name: str = names.get_last_name()
             username : str= f'{first_name.lower()}_{last_name.lower()}'
