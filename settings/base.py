@@ -130,7 +130,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-ADMIN_SITE_URL = '12345'
+ADMIN_SITE_URL = '12345/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
@@ -164,6 +164,6 @@ SHELL_PLUS_MODEL_ALIASES = {
         'Professor': 'P',
     },
 }
-SHELL_PLUS = 'ipython'
+SHELL_PLUS = 'Ipython'
 SHELL_PLUS_PRINT_SQL = True
 SHELL_PLUS_PRINT_SQL_TRUNCATE = 1000

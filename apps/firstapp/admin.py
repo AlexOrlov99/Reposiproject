@@ -5,26 +5,28 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.contrib.auth.models import User
 
 
-from . models import Account
-from . models import Group
-from . models import Student
-from . models import Professor
+from . models import (
+    Account, 
+    Group,
+    Student,
+    Professor,
+    )
 
 
-# class UserAdmin(admin.ModelAdmin):
-#     redonly_fields = ()
-#     user_fields = ('first_name', 'last_name', 'email', 
-#                         'username', 'is_active', 'is_staff',
-#                         'is_superuser', 'date_joined', 'last_login',)
+class UserAdmin(admin.ModelAdmin):
+    redonly_fields = ()
+    user_fields = ('first_name', 'last_name', 'email', 
+                        'username', 'is_active', 'is_staff',
+                        'is_superuser', 'date_joined', 'last_login',)
                         
-#     def get_readonly_fields(
-#         self,
-#         request: WSGIRequest,
-#         obj: Optional[User] = None
-#     ) -> tuple:
-#         if obj:
-#             return self.readonly_fields + self.user_fields
-#         return self.readonly_fields
+    def get_readonly_fields(
+        self,
+        request: WSGIRequest,
+        obj: Optional[User] = None
+    ) -> tuple:
+        if obj:
+            return self.readonly_fields + self.user_fields
+        return self.readonly_fields
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -98,9 +100,12 @@ class ProfessorAdmin(admin.ModelAdmin):
         'datatime_deleted',
         )
 
-# admin.site.register(
-#     User, UserAdmin
-# )
+admin.site.unregister(
+    User,
+)
+admin.site.register(
+    User, UserAdmin
+)
 
 admin.site.register(
     Account,AccountAdmin

@@ -31,15 +31,7 @@ class Command(BaseCommand):
     def _generate_users(self) -> None:
         """Generate Users objs."""
         TOTAL_USERS_COUNT = 500
-
-        def generate_first_name()-> str:
-            first_name: str = names.get_first_name()
-            return first_name
-        
-        def generate_last_name() -> str:
-            last_name: str = names.get_last_name()
-            return last_name
-        
+    
         def generate_password() -> str:
             _password_pattern: str = 'abcde12345'
             password: str = make_password(_password_pattern)
@@ -54,19 +46,35 @@ class Command(BaseCommand):
                 'mail.ru', 'mail.ua', 'mail.kz',
                 )
             domain_name: str = random.choice(_email_patterns)
-            full_name: str = first_name.lower() + '.' + last_name.lower()
-            email: str = full_name + '@' + domain_name
+            full_name: str = f'{first_name.lower()}.{last_name.lower()}'
+            email: str = f'{full_name}@{domain_name}'
             return email
 
         def generate_username(first_name: str, last_name: str) -> str:
-            username: str = first_name.lower()  + '_' + last_name.lower() 
+            username: str = f'{first_name.lower()}_{last_name.lower()}'
             return username
-            
-        inc: int
+
+        if not User.objects.filter(is_superuser=True).exists():
+            superuser: dict = {
+                'is_superuser': True,
+                'is_staff': True,
+                'username': 'alex',
+                'email': 'orlo.alex@mail.ru',
+                'password': 'andromeda',
+                'first_name': 'Alexey',
+                'last_name': 'Orlov',
+            }
+            User.objects.create_superuser(**superuser)
+        if User.objects.filter(
+            is_superuser=False
+            ).count()== TOTAL_USERS_COUNT:
+            return
+
+        _: int
         user_count: int = User.objects.count()
-        for inc in range(TOTAL_USERS_COUNT - user_count):
-            first_name: str = generate_first_name()
-            last_name: str = generate_last_name()
+        for _ in range(TOTAL_USERS_COUNT - user_count):
+            first_name: str = names.get_first_name()
+            last_name: str = names.get_last_name()
             username : str= generate_username(first_name, last_name)
             email: str = generate_email(first_name, last_name)
             password: str = generate_password()
