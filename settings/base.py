@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import sys
 
+from . import get_env_variable
+
+from settings.conf import *
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -22,7 +26,7 @@ sys.path.append(os.path.join(BASE_DIR,'apps'))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'cfkpknpwlzo8+9imu*6!g!+92vqaio0&c-cy+xgm3!wk_$o^)+'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -32,14 +36,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 DJANGO_AND_THIRD_PARTY_APPS = [
-    'debug_toolbar',
-    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
+    'django_extensions',
 ]
 PROJECT_APPS = [
     'firstapp.apps.FirstappConfig',
@@ -130,40 +134,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-ADMIN_SITE_URL = '12345/'
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
-]
-DEBUG_TOOLBAR_PATCH_SETTINGS = False
-
-SHELL_PLUS_PRE_IMPORTS = [
-    ('django.db', ('connection', 'reset_queries', 'connections')),
-    ('datetime', ('datetime', 'timedelta', 'date')),
-    ('json', ('loads', 'dumps')),
-]
-SHELL_PLUS_MODEL_ALIASES = {
-    'university': {
-        'Student': 'S',
-        'Account': 'A',
-        'Group': 'G',
-        'Professor': 'P',
-    },
-}
-SHELL_PLUS = 'Ipython'
-SHELL_PLUS_PRINT_SQL = True
-SHELL_PLUS_PRINT_SQL_TRUNCATE = 1000

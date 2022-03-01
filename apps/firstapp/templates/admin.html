@@ -24,7 +24,7 @@
                         <br> Role: 
                         <span id="role">{% if user.is_superuser %}Admin{% else %}User{% endif %}</span>
                     </div>
-                    <a class="edit" href="{% url 'page_show' user.username %}" role="button">Show</a>
+                    <a class="edit" href="{% url 'page_show' user.id %}" role="button">Show</a>
                     <a class="delete" href="{% url 'page_delete' %}" role="button">Delete</a>
                 </div>
 
