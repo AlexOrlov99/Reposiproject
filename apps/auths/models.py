@@ -1,3 +1,4 @@
+from email.policy import default
 from django.contrib.auth.models import (
     AbstractBaseUser, 
     PermissionsMixin,
@@ -6,83 +7,62 @@ from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 
+from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
 
     def create_user(
-        self, 
-        email: str, 
-        password: str, 
-        **kwargs: dict
-        ) -> 'CustomUser':
+        self,
+        email: str,
+        password: str
+    ) -> 'CustomUser':
 
         if not email:
             raise ValidationError('Email required')
 
-        email: str = self.normalize_email(email)
-        user: CustomUser = self.model(
-            email=email,
-            **kwargs
+        user: 'CustomUser' = self.model(
+            email=self.normalize_email(email),
+            password=password
         )
         user.set_password(password)
-        user.save()
+        user.save(using=self._db)
         return user
 
     def create_superuser(
         self,
         email: str,
-        password: str,
-        **kwargs: dict
+        password: str
     ) -> 'CustomUser':
-        kwargs.setdefault('is_staff', True)
-        kwargs.setdefault('is_root', True)
 
-        if kwargs.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True')
-        if kwargs.get('is_root') is not True:
-            raise ValueError('Superuser must have is_root=True')
-
-        user: 'Customer' =  self.create_user(
-            email,
-            password,
-            **kwargs
+        user: 'CustomUser' = self.model(
+            email=self.normalize_email(email),
+            password=password
         )
+        user.is_staff = True
+        user.is_superuser = True
+        user.set_password(password)
+        user.save(using=self._db)
         return user
 
-
+        
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField('Почта/Логин', unique=True)
-    is_root = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
-    datatime_joined = models.DatetimeField(
-        verbose_name='Время регистрации',
-        auto_now_add=True
+    email = models.EmailField(
+        'Почта/Логин', unique=True
     )
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
 
-    def __str__(self) -> str:
-        return f'User{self.email}, {self.is_root}, \
-        {self.is_staff}, {self.datatime_joined}'
-
-
-    def save(self,
-        *args: tuple,
-        **kwargs: dict
-        ) -> None:
-        if self.email is not self.email.lower():
-            raise ValidationError(
-                f'{self.email} - invalid'
-            )
-            
     class Meta:
         ordering = (
-            'email',
-            'is_root',
-            'is_staff',
-            'datatime_joined',
+            'date_joined',
         )
         verbose_name = 'Пользователь'
-        verbose_name = 'Пользователи'
+        verbose_name_plural = 'Пользователи'
+
+        

@@ -4,16 +4,16 @@ from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
 from django.contrib.auth.models import User
 
+from auths.models import CustomUser
 
 from . models import (
-    Account, 
     Group,
     Student,
     Professor,
     )
 
 
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     redonly_fields = ()
     user_fields = ('first_name', 'last_name', 'email', 
                         'username', 'is_active', 'is_staff',
@@ -29,21 +29,21 @@ class UserAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
-class AccountAdmin(admin.ModelAdmin):
-    readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
-        )
+# class AccountAdmin(admin.ModelAdmin):
+#     readonly_fields = (
+#         'datatime_created',
+#         'datatime_updated',
+#         'datatime_deleted',
+#         )
 
-    def get_readonly_fields(
-        self,
-        request: WSGIRequest,
-        obj: Optional[Account] = None
-    ) -> tuple:
-        if obj:
-            return self.readonly_fields + ('description',)
-        return self.readonly_fields
+#     def get_readonly_fields(
+#         self,
+#         request: WSGIRequest,
+#         obj: Optional[Account] = None
+#     ) -> tuple:
+#         if obj:
+#             return self.readonly_fields + ('description',)
+#         return self.readonly_fields
 
 
 class GroupAdmin(admin.ModelAdmin):
@@ -100,16 +100,16 @@ class ProfessorAdmin(admin.ModelAdmin):
         'datatime_deleted',
         )
 
-admin.site.unregister(
-    User,
-)
+# admin.site.unregister(
+#     User,
+# )
 admin.site.register(
-    User, UserAdmin
+    User, CustomUserAdmin
 )
 
-admin.site.register(
-    Account,AccountAdmin
-)
+# admin.site.register(
+#     Account,AccountAdmin
+# )
 
 admin.site.register(
     Group, GroupAdmin

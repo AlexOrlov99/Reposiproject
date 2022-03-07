@@ -1,12 +1,8 @@
-
-import os
-import sys
-
 from . import get_env_variable
-
 
 SECRET_KEY = get_env_variable('SECRET_KEY')
 ADMIN_SITE_URL = get_env_variable('ADMIN_SITE_URL')
+AUTH_USER_MODEL = get_env_variable('AUTH_USER_MODEL')
 
 # ---------------------------------------------------------
 DEBUG_TOOLBAR_PANELS = [

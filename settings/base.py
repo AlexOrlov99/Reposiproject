@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import sys
 
-from . import get_env_variable
-
 from settings.conf import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -30,7 +28,6 @@ sys.path.append(os.path.join(BASE_DIR,'apps'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -48,6 +45,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     'firstapp.apps.FirstappConfig',
     'abstracts.apps.AbstractsConfig',
+    'auths.apps.AuthsConfig',
 ]
 
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS

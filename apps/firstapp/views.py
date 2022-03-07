@@ -2,11 +2,11 @@ from django.db.models import QuerySet
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-
 from django.shortcuts import render
 
+from auths.models import CustomUser
+
 from firstapp.models import (
-    Account,
     Group,
     Student,
     Professor,
@@ -19,14 +19,19 @@ def index(request: WSGIRequest) -> HttpResponse:
     student: Student = Student.objects.first()
     gpa: int = student.gpa
     
-    account: Account = student.account
-    name_acc: str = account.full_name
+    # account: Account = student.account
+    # name_acc: str = account.full_name
 
-    user: User = account.user
-    name: str = user.first_name
+    # user: User = account.user
+    # name: str = user.first_name
+    customuser : CustomUser
+    login : CustomUser.email
 
-    text: str = f'''<h1>Username: {name}<br> Account: {name_acc}<br>
-                        GPA: {gpa}</h1>
+
+    # text: str = f'''<h1>Username: {name}<br> Account: {name_acc}<br>
+    #                     GPA: {gpa}</h1>
+                # '''
+    text: str = f'''<h1>Login : {login}>
                 '''
 
     response: HttpResponse = HttpResponse(text)
@@ -38,7 +43,7 @@ def index_2(request: WSGIRequest) -> HttpResponse:
     )
 
 def index(request: WSGIRequest) -> HttpResponse:
-    users: QuerySet = User.objects.all()
+    users: QuerySet = CustomUser.objects.all()
     context: dict = {
         'ctx_title': 'Главная страница',
         'ctx_users': users,
@@ -51,7 +56,7 @@ def index(request: WSGIRequest) -> HttpResponse:
 def admin(request: WSGIRequest) -> HttpResponse:
     context: dict = {
         'ctx_title': 'Главная страница',
-        'ctx_users': User.objects.all(),
+        'ctx_users': CustomUser.objects.all(),
     }
     
     return render(
@@ -60,7 +65,7 @@ def admin(request: WSGIRequest) -> HttpResponse:
         context
     )
 def show(request: WSGIRequest, user_id: str) -> HttpResponse:
-    user = User.objects.get(id=user_id)
+    user = CustomUser.objects.get(id=user_id)
     context: dict = {
         'ctx_title': 'Профиль пользователя',
         'ctx_user': user,
