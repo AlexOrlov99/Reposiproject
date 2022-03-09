@@ -29,9 +29,13 @@ SHELL_PLUS_PRE_IMPORTS = [
 ]
 
 SHELL_PLUS_MODEL_ALIASES = {
-    'university': {
+    'auths':{
+        'CustomUser':'U',
+    },
+    'firstapp': {
         'Student': 'S',
-        'Account': 'A',
+        'File': 'F',
+        'Homework': 'H',
         'Group': 'G',
         'Professor': 'P',
     },

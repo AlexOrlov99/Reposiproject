@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from auths.models import CustomUser
 
 from . models import (
+    File,
+    Homework,
     Group,
     Student,
     Professor,
@@ -27,23 +29,6 @@ class CustomUserAdmin(admin.ModelAdmin):
         if obj:
             return self.readonly_fields + self.user_fields
         return self.readonly_fields
-
-
-# class AccountAdmin(admin.ModelAdmin):
-#     readonly_fields = (
-#         'datatime_created',
-#         'datatime_updated',
-#         'datatime_deleted',
-#         )
-
-#     def get_readonly_fields(
-#         self,
-#         request: WSGIRequest,
-#         obj: Optional[Account] = None
-#     ) -> tuple:
-#         if obj:
-#             return self.readonly_fields + ('description',)
-#         return self.readonly_fields
 
 
 class GroupAdmin(admin.ModelAdmin):
@@ -100,16 +85,26 @@ class ProfessorAdmin(admin.ModelAdmin):
         'datatime_deleted',
         )
 
-# admin.site.unregister(
-#     User,
-# )
+
+class FileAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+
+
+class HomeworkAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+
+
 admin.site.register(
     User, CustomUserAdmin
 )
-
-# admin.site.register(
-#     Account,AccountAdmin
-# )
 
 admin.site.register(
     Group, GroupAdmin
@@ -121,4 +116,12 @@ admin.site.register(
 
 admin.site.register(
     Professor, ProfessorAdmin
+)
+
+admin.site.register(
+    File, FileAdmin
+)
+
+admin.site.register(
+    Homework, HomeworkAdmin
 )

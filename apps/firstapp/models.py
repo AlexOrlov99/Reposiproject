@@ -1,7 +1,6 @@
 from datetime import (
     datetime,
 )
-
 from django.db import (
     models,
 )
@@ -107,6 +106,7 @@ class Student(AbstarctDateTime):
     )
     objects = StudentQuerySet().as_manager()
 
+
     def __str__(self) -> str:
         return f'Student: {self.user}, {self.age}, \
             {self.gpa}, {self.group.name}'
@@ -144,7 +144,6 @@ class Student(AbstarctDateTime):
         verbose_name_plural = 'Стундеты'
 
 
-
 class Professor(AbstarctDateTime):
     FULL_NAME_MAX_LENGTH = 20
 
@@ -170,6 +169,10 @@ class Professor(AbstarctDateTime):
         (TOPIC_PHP, 'PHP'),
         (TOPIC_DELPHI, 'Delphi'),
         (TOPIC_PERL, 'Perl')
+    )
+
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.PROTECT
     )
     full_name = models.CharField(
         verbose_name='Полное имя',
@@ -205,3 +208,55 @@ class Professor(AbstarctDateTime):
         )
         verbose_name = 'Преподователь'
         verbose_name_plural = 'Преподователи'
+
+
+class File(AbstarctDateTime):
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    file = models.FileField(
+        upload_to='', 
+        max_length=100,
+    )
+    class Meta:
+        verbose_name = 'Вложенный файл'
+        verbose_name_plural = 'Вложенные файлы'
+
+
+class HomeworkQueryset(QuerySet):
+
+    def get_not_deleted(self) -> QuerySet:
+        return self.filter(datetime_deleted__isnull=True)
+        
+
+class Homework(AbstarctDateTime):
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    subject = models.CharField(
+        max_length=100,
+        verbose_name='Предмет',
+        )
+    logo = models.ImageField(
+        upload_to=''
+        )
+
+    is_checked = models.BooleanField(
+        default = False,
+    )
+    files = models.ForeignKey(
+        File, on_delete=models.PROTECT
+    )
+    student = models.ForeignKey(
+        Student, on_delete=models.PROTECT
+    )
+    objects = HomeworkQueryset().as_manager()
+
+    class Meta:
+        ordering = (
+            'datatime_created',
+        )
+        verbose_name = 'Домашнее задание'
+        verbose_name_plural = 'Домашние задания'
