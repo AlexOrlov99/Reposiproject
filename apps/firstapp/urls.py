@@ -24,5 +24,20 @@ urlpatterns = [
         'delete',
         views.delete, 
         name='page_delete'
-    )
+    ),
+    path(
+        'register',
+        views.register,
+        name='page_register'
+    ),
+    path(
+        'login',
+        views.login,
+        name='page_login'
+    ),
+    path(
+        'logout',
+        views.logout,
+        name='page_logout'
+    ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

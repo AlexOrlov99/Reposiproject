@@ -216,8 +216,8 @@ class File(AbstarctDateTime):
         verbose_name='Название',
         )
     file = models.FileField(
-        upload_to='', 
-        max_length=100,
+        upload_to='homeworks/files/%Y/%m/%d',
+        verbose_name='Файл'
     )
     class Meta:
         verbose_name = 'Вложенный файл'
@@ -231,6 +231,9 @@ class HomeworkQueryset(QuerySet):
         
 
 class Homework(AbstarctDateTime):
+    student = models.ForeignKey(
+        Student, on_delete=models.PROTECT
+    )
     title = models.CharField(
         max_length=100,
         verbose_name='Название',
@@ -240,7 +243,8 @@ class Homework(AbstarctDateTime):
         verbose_name='Предмет',
         )
     logo = models.ImageField(
-        upload_to=''
+        upload_to='homeworks/logos/%Y/%m/%d',
+        verbose_name='Лого'
         )
 
     is_checked = models.BooleanField(
@@ -248,9 +252,6 @@ class Homework(AbstarctDateTime):
     )
     files = models.ForeignKey(
         File, on_delete=models.PROTECT
-    )
-    student = models.ForeignKey(
-        Student, on_delete=models.PROTECT
     )
     objects = HomeworkQueryset().as_manager()
 
