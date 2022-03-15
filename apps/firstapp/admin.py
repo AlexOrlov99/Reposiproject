@@ -1,36 +1,61 @@
 from typing import Optional
+
 from django.contrib import admin
 from django.core.handlers.wsgi import WSGIRequest
-from . models import Account
-from . models import Group
-from . models import Student
-from . models import Professor
+from django.contrib.auth.models import User
 
-class AccountAdmin(admin.ModelAdmin):
-    readonly_fields = ()
+from auths.models import CustomUser
 
+from . models import (
+    File,
+    Homework,
+    Group,
+    Student,
+    Professor,
+    )
+
+
+class CustomUserAdmin(admin.ModelAdmin):
+    redonly_fields = ()
+    user_fields = ('first_name', 'last_name', 'email', 
+                        'username', 'is_active', 'is_staff',
+                        'is_superuser', 'date_joined', 'last_login',)
+                        
     def get_readonly_fields(
         self,
         request: WSGIRequest,
-        obj: Optional[Account] = None
+        obj: Optional[User] = None
     ) -> tuple:
         if obj:
-            return self.readonly_fields + ('description',)
+            return self.readonly_fields + self.user_fields
         return self.readonly_fields
 
 
 class GroupAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'Group.datatime_created'
-        'Group.datatime_deleted'
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
         )
 
 
-class GroupAdmin(admin.ModelAdmin):
-    readonly_fields = ()
-
 class StudentAdmin(admin.ModelAdmin):
-    readonly_fields = ()
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+    list_filter = (
+        'age',
+        'gpa',
+    )
+    searh_filter = (
+        'account__full_name',
+    )
+    list_display = (
+        'age',
+        'gpa',
+    )
     STUDENT_MAX_AGE = 16
 
     def student_age_validation(
@@ -52,11 +77,33 @@ class StudentAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('age',)
         return self.readonly_fields
 
+
 class ProfessorAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+
+
+class FileAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+
+
+class HomeworkAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'datatime_created',
+        'datatime_updated',
+        'datatime_deleted',
+        )
+
 
 admin.site.register(
-    Account,AccountAdmin
+    User, CustomUserAdmin
 )
 
 admin.site.register(
@@ -69,4 +116,12 @@ admin.site.register(
 
 admin.site.register(
     Professor, ProfessorAdmin
+)
+
+admin.site.register(
+    File, FileAdmin
+)
+
+admin.site.register(
+    Homework, HomeworkAdmin
 )

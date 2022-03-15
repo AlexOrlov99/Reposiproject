@@ -1,43 +1,66 @@
 from datetime import (
     datetime,
 )
-
 from django.db import (
     models,
 )
-# from django.db.models import (
-#     Queryset,
-# )
+from django.db.models import (
+    QuerySet,
+)
 from django.core.exceptions import(
     ValidationError,
 )
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 from abstracts.models import AbstarctDateTime
 
+from auths.models import CustomUser
 
-class Account(AbstarctDateTime):
 
-    ACCOUNT_FULL_NAME_MAX_LENGTH = 20
+# class AccountQuerySet(QuerySet):
+    
+#     def get_superusers(self) -> QuerySet:
+#         return self.filter(
+#             user__is_superuser=True
+#         )
 
-    user = models.OneToOneField(
-        User,
-        on_delete = models.CASCADE
-    )
-    full_name = models.CharField(
-        max_length=ACCOUNT_FULL_NAME_MAX_LENGTH
-    )
-    description = models.TextField()
 
-    def __str__(self) -> str:
-        return f'Account: {self.user.id}  {self.full_name}' 
+# class Account(AbstarctDateTime):
 
-    class Meta:
-        ordering = (
-            'full_name',
+#     ACCOUNT_FULL_NAME_MAX_LENGTH = 20
+
+#     user = models.OneToOneField(
+#         User,
+#         on_delete = models.CASCADE
+#     )
+#     full_name = models.CharField(
+#         max_length=ACCOUNT_FULL_NAME_MAX_LENGTH
+#     )
+#     description = models.TextField()
+
+#     objects = AccountQuerySet().as_manager()
+
+#     def __str__(self) -> str:
+#         return f'Account: {self.user.id}  {self.full_name}' 
+    
+
+#     class Meta:
+#         ordering = (
+#             'full_name',
+#         )
+#         verbose_name = 'Аккаунт'
+#         verbose_name_plural = 'Аккаунты'
+
+
+
+class GroupQuerySet(QuerySet):
+
+    HIGH_GPA_LEVEL = 4.0
+
+    def get_students_with_high_gpa(self) -> QuerySet:
+        return self.filter(
+            group__student__gpa=self.HIGH_GPA_LEVEL
         )
-        verbose_name = 'Аккаунт'
-        verbose_name_plural = 'Аккаунты'
 
 
 class Group(AbstarctDateTime):
@@ -46,6 +69,7 @@ class Group(AbstarctDateTime):
     name = models.CharField(
         max_length = GROUP_NAME_MAX_LENGTH
     )
+    objects = GroupQuerySet().as_manager()
     def __str__(self) -> str:
         return f'Group: {self.name}'
 
@@ -57,10 +81,19 @@ class Group(AbstarctDateTime):
         verbose_name_plural = 'Группы'
 
 
+class StudentQuerySet(QuerySet):
+    ADULT_AGE = 18
+
+    def get_adult_student(self) -> QuerySet:
+        return self.filter(
+            age__gte=self.ADULT_AGE
+        )
+
+
 class Student(AbstarctDateTime):
     MAX_AGE = 27
-    account = models.ForeignKey(
-        Account, on_delete=models.CASCADE
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.PROTECT
     )
     age = models.IntegerField(
         'Возраст студента', 
@@ -71,8 +104,11 @@ class Student(AbstarctDateTime):
     group = models.ForeignKey(
         Group, on_delete=models.PROTECT
     )
+    objects = StudentQuerySet().as_manager()
+
+
     def __str__(self) -> str:
-        return f'Student: {self.account}, {self.age}, \
+        return f'Student: {self.user}, {self.age}, \
             {self.gpa}, {self.group.name}'
     
     def save(self,
@@ -99,7 +135,7 @@ class Student(AbstarctDateTime):
 
     class Meta:
         ordering = (
-            'account',
+            'user',
             'age',
             'group',
             'gpa'
@@ -133,6 +169,10 @@ class Professor(AbstarctDateTime):
         (TOPIC_PHP, 'PHP'),
         (TOPIC_DELPHI, 'Delphi'),
         (TOPIC_PERL, 'Perl')
+    )
+
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.PROTECT
     )
     full_name = models.CharField(
         verbose_name='Полное имя',
@@ -168,3 +208,56 @@ class Professor(AbstarctDateTime):
         )
         verbose_name = 'Преподователь'
         verbose_name_plural = 'Преподователи'
+
+
+class File(AbstarctDateTime):
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    file = models.FileField(
+        upload_to='homeworks/files/%Y/%m/%d',
+        verbose_name='Файл'
+    )
+    class Meta:
+        verbose_name = 'Вложенный файл'
+        verbose_name_plural = 'Вложенные файлы'
+
+
+class HomeworkQueryset(QuerySet):
+
+    def get_not_deleted(self) -> QuerySet:
+        return self.filter(datetime_deleted__isnull=True)
+        
+
+class Homework(AbstarctDateTime):
+    student = models.ForeignKey(
+        Student, on_delete=models.PROTECT
+    )
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    subject = models.CharField(
+        max_length=100,
+        verbose_name='Предмет',
+        )
+    logo = models.ImageField(
+        upload_to='homeworks/logos/%Y/%m/%d',
+        verbose_name='Лого'
+        )
+
+    is_checked = models.BooleanField(
+        default = False,
+    )
+    files = models.ForeignKey(
+        File, on_delete=models.PROTECT
+    )
+    objects = HomeworkQueryset().as_manager()
+
+    class Meta:
+        ordering = (
+            'datatime_created',
+        )
+        verbose_name = 'Домашнее задание'
+        verbose_name_plural = 'Домашние задания'
