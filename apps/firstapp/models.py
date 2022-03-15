@@ -115,7 +115,7 @@ class Student(AbstarctDateTime):
         if self.age > self.MAX_AGE:
             self.age = self.MAX_AGE
             raise ValidationError(
-                f'Допустимый восраст : {self.MAX_AGE}'
+                f'Допустимый возраст : {self.MAX_AGE}'
             )
         super().save(*args, **kwargs)
     

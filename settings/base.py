@@ -48,6 +48,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     'firstapp.apps.FirstappConfig',
     'abstracts.apps.AbstractsConfig',
+    'auths.apps.AuthsConfig',
 ]
 
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS

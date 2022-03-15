@@ -54,7 +54,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('Почта/Логин', unique=True)
     is_root = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    datatime_joined = models.DatetimeField(
+    datatime_joined = models.DateTimeField(
         verbose_name='Время регистрации',
         auto_now_add=True
     )
