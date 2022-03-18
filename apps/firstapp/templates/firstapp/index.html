@@ -1,18 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'firstapp/base.html' %}
 
 {% block title %}{{ ctx_title }}{% endblock %}
 
 {%  block content %}
     <h1>Текст на первом</h1>
 
-    {% include 'additional.html' %}
+    {% include 'firstapp/additional.html' %}
 
     {% for user in ctx_users %}
         <div class="alert alert-error mt-2">
-            <p>Username - {{ user.username }}</p>
             <p>Email - {{ user.email }}</p>
-            <p>first_name - {{ user.first_name }}</p>
-            <p>last_name - {{ user.last_name }}</p>
+            <!-- <p>first_name - {{ user.first_name }}</p>
+            <p>last_name - {{ user.last_name }}</p> -->
             <hr>
         </div>
     {% endfor %}

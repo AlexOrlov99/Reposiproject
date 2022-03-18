@@ -1,16 +1,18 @@
 
 import names, random
 
-from typing import Any
 from datetime import datetime
 
 from logging import raiseExceptions
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.contrib.auth.models import (
-    User,
-)
+# from django.contrib.auth.models import (
+#     User,
+# )
+
+from auths.models import CustomUser
+
 from django.contrib.auth.hashers import make_password
 
 from firstapp.models import (
@@ -54,7 +56,7 @@ class Command(BaseCommand):
             username: str = f'{first_name.lower()}_{last_name.lower()}'
             return username
 
-        if not User.objects.filter(is_superuser=True).exists():
+        if not CustomUser.objects.filter(is_superuser=True).exists():
             superuser: dict = {
                 'is_superuser': True,
                 'is_staff': True,
@@ -65,7 +67,7 @@ class Command(BaseCommand):
                 'last_name': 'Orlov',
             }
             User.objects.create_superuser(**superuser)
-        if User.objects.filter(
+        if CustomUser.objects.filter(
             is_superuser=False
             ).count()== TOTAL_USERS_COUNT:
             return
@@ -78,7 +80,7 @@ class Command(BaseCommand):
             username : str= generate_username(first_name, last_name)
             email: str = generate_email(first_name, last_name)
             password: str = generate_password()
-            User.objects.create(
+            CustomUser.objects.create(
                 username=username,
                 first_name=first_name,
                 last_name=last_name,
@@ -86,20 +88,20 @@ class Command(BaseCommand):
                 password=password
             )
 
-# def _generate_groups(self) -> None:
-    #     """Generate Group objs."""
+    def _generate_groups(self) -> None:
+            """Generate Group objs."""
 
-    #     def generate_name(inc: int) -> str:
-    #         return f'Группа {inc}'
+            def generate_name(inc: int) -> str:
+                return f'Группа {inc}'
 
-    #     inc: int
-    #     for inc in range(20):
-    #         name: str = generate_name(inc)
-    #         Group.objects.create(
-    #             name=name
-    #         )
+            inc: int
+            for inc in range(20):
+                name: str = generate_name(inc)
+                Group.objects.create(
+                    name=name
+                )
 
-    # def _generate_accounts_and_students(self) -> None:
+    # def _generate_students(self) -> None:
     #     """Generate Accounts and Students objs."""
 
     #     def generate_name(inc: int) -> str:

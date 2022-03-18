@@ -1,7 +1,6 @@
 from datetime import (
     datetime,
 )
-
 from django.db import (
     models,
 )
@@ -11,44 +10,47 @@ from django.db.models import (
 from django.core.exceptions import(
     ValidationError,
 )
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 from abstracts.models import AbstarctDateTime
 
+from auths.models import CustomUser
 
-class AccountQuerySet(QuerySet):
+
+# class AccountQuerySet(QuerySet):
     
-    def get_superusers(self) -> QuerySet:
-        return self.filter(
-            user__is_superuser=True
-        )
+#     def get_superusers(self) -> QuerySet:
+#         return self.fclilter(
+#             user__is_superuser=True
+#         )
 
 
-class Account(AbstarctDateTime):
+# class Account(AbstarctDateTime):
 
-    ACCOUNT_FULL_NAME_MAX_LENGTH = 20
+#     ACCOUNT_FULL_NAME_MAX_LENGTH = 20
 
-    user = models.OneToOneField(
-        User,
-        on_delete = models.CASCADE
-    )
-    full_name = models.CharField(
-        max_length=ACCOUNT_FULL_NAME_MAX_LENGTH
-    )
-    description = models.TextField()
+#     user = models.OneToOneField(
+#         User,
+#         on_delete = models.CASCADE
+#     )
+#     full_name = models.CharField(
+#         max_length=ACCOUNT_FULL_NAME_MAX_LENGTH
+#     )
+#     description = models.TextField()
 
-    objects = AccountQuerySet().as_manager()
+#     objects = AccountQuerySet().as_manager()
 
-    def __str__(self) -> str:
-        return f'Account: {self.user.id}  {self.full_name}' 
+#     def __str__(self) -> str:
+#         return f'Account: {self.user.id}  {self.full_name}' 
     
 
-    class Meta:
-        ordering = (
-            'full_name',
-        )
-        verbose_name = 'Аккаунт'
-        verbose_name_plural = 'Аккаунты'
+#     class Meta:
+#         ordering = (
+#             'full_name',
+#         )
+#         verbose_name = 'Аккаунт'
+#         verbose_name_plural = 'Аккаунты'
+
 
 
 class GroupQuerySet(QuerySet):
@@ -90,8 +92,8 @@ class StudentQuerySet(QuerySet):
 
 class Student(AbstarctDateTime):
     MAX_AGE = 27
-    account = models.ForeignKey(
-        Account, on_delete=models.CASCADE
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.PROTECT
     )
     age = models.IntegerField(
         'Возраст студента', 
@@ -104,8 +106,9 @@ class Student(AbstarctDateTime):
     )
     objects = StudentQuerySet().as_manager()
 
+
     def __str__(self) -> str:
-        return f'Student: {self.account}, {self.age}, \
+        return f'Student: {self.user}, {self.age}, \
             {self.gpa}, {self.group.name}'
     
     def save(self,
@@ -132,7 +135,7 @@ class Student(AbstarctDateTime):
 
     class Meta:
         ordering = (
-            'account',
+            'user',
             'age',
             'group',
             'gpa'
@@ -166,6 +169,10 @@ class Professor(AbstarctDateTime):
         (TOPIC_PHP, 'PHP'),
         (TOPIC_DELPHI, 'Delphi'),
         (TOPIC_PERL, 'Perl')
+    )
+
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.PROTECT
     )
     full_name = models.CharField(
         verbose_name='Полное имя',
@@ -201,3 +208,59 @@ class Professor(AbstarctDateTime):
         )
         verbose_name = 'Преподователь'
         verbose_name_plural = 'Преподователи'
+
+
+class File(AbstarctDateTime):
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    file = models.FileField(
+        upload_to='homeworks/files/%Y/%m/%d',
+        verbose_name='Файл'
+    )
+    class Meta:
+        verbose_name = 'Вложенный файл'
+        verbose_name_plural = 'Вложенные файлы'
+
+
+class HomeworkQueryset(QuerySet):
+
+    def get_not_deleted(self) -> QuerySet:
+        return self.filter(datetime_deleted__isnull=True)
+        
+
+class Homework(AbstarctDateTime):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.PROTECT
+    )
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    subject = models.CharField(
+        max_length=100,
+        verbose_name='Предмет',
+        )
+    logo = models.ImageField(
+        upload_to='homeworks/logos/%Y/%m/%d',
+        verbose_name='Лого'
+        )
+
+    is_checked = models.BooleanField(
+        default = False,
+    )
+    files = models.ForeignKey(
+        File, on_delete=models.PROTECT
+    )
+    objects = HomeworkQueryset().as_manager()
+
+    def __str__(self) -> str:
+        return f'{self.subject} | {self.title}'
+
+    class Meta:
+        ordering = (
+            'datatime_created',
+        )
+        verbose_name = 'Домашнее задание'
+        verbose_name_plural = 'Домашние задания'
