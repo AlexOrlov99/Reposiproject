@@ -19,6 +19,18 @@ from firstapp.models import (
     Professor,
     Homework
 )
+from django.views import View
+
+
+class IndexView(View):
+
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+    ):
+        return HttpResponse('Hello, World!')
+
 
 def index(request: WSGIRequest) -> HttpResponse:
 
@@ -103,7 +115,7 @@ def register(request: WSGIRequest) -> HttpResponse:
             )
             return render(
                 request,
-                'firstapp/index.html',
+                'firstapp/main.html',
                 {'homeworks': homeworks}
             )
     context: dict = {

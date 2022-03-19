@@ -17,42 +17,6 @@ from abstracts.models import AbstarctDateTime
 from auths.models import CustomUser
 
 
-# class AccountQuerySet(QuerySet):
-    
-#     def get_superusers(self) -> QuerySet:
-#         return self.fclilter(
-#             user__is_superuser=True
-#         )
-
-
-# class Account(AbstarctDateTime):
-
-#     ACCOUNT_FULL_NAME_MAX_LENGTH = 20
-
-#     user = models.OneToOneField(
-#         User,
-#         on_delete = models.CASCADE
-#     )
-#     full_name = models.CharField(
-#         max_length=ACCOUNT_FULL_NAME_MAX_LENGTH
-#     )
-#     description = models.TextField()
-
-#     objects = AccountQuerySet().as_manager()
-
-#     def __str__(self) -> str:
-#         return f'Account: {self.user.id}  {self.full_name}' 
-    
-
-#     class Meta:
-#         ordering = (
-#             'full_name',
-#         )
-#         verbose_name = 'Аккаунт'
-#         verbose_name_plural = 'Аккаунты'
-
-
-
 class GroupQuerySet(QuerySet):
 
     HIGH_GPA_LEVEL = 4.0
@@ -210,6 +174,13 @@ class Professor(AbstarctDateTime):
         verbose_name_plural = 'Преподователи'
 
 
+class FileQueryset(QuerySet):
+
+    def get_is_checked(self) -> QuerySet:
+        return self.filter(
+            homework__is_checked=True)
+
+
 class File(AbstarctDateTime):
     title = models.CharField(
         max_length=100,
@@ -219,6 +190,8 @@ class File(AbstarctDateTime):
         upload_to='homeworks/files/%Y/%m/%d',
         verbose_name='Файл'
     )
+    objects = FileQueryset().as_manager()
+
     class Meta:
         verbose_name = 'Вложенный файл'
         verbose_name_plural = 'Вложенные файлы'
@@ -228,7 +201,7 @@ class HomeworkQueryset(QuerySet):
 
     def get_not_deleted(self) -> QuerySet:
         return self.filter(datetime_deleted__isnull=True)
-        
+
 
 class Homework(AbstarctDateTime):
     user = models.ForeignKey(
