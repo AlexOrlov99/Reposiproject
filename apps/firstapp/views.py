@@ -19,6 +19,17 @@ from firstapp.models import (
     Professor,
     Homework
 )
+from django.views import View
+
+
+class IndexView(View):
+
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+    ):
+        return HttpResponse('Hello, World!')
 
 
 def index(request: WSGIRequest) -> HttpResponse:
@@ -26,7 +37,7 @@ def index(request: WSGIRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return render(
             request,
-            'firsapp/login.html'
+            'firstapp/login.html'
         )
     homeworks: QuerySet = Homework.objects.filter(
         user=request.user
@@ -37,7 +48,7 @@ def index(request: WSGIRequest) -> HttpResponse:
     }
     return render(
         request,
-        template_name='firstapp/index.html',
+        template_name='firstapp/main.html',
         context=context
     )
 
@@ -54,7 +65,7 @@ def admin(request: WSGIRequest) -> HttpResponse:
     
     return render(
         request,
-        'admin.html',
+        'firstapp/admin.html',
         context
     )
 
@@ -66,7 +77,7 @@ def show(request: WSGIRequest, user_id: str) -> HttpResponse:
     }
     return render(
         request,
-        'show.html',
+        'firstapp/show.html',
         context
     )
 
@@ -104,7 +115,7 @@ def register(request: WSGIRequest) -> HttpResponse:
             )
             return render(
                 request,
-                'firstapp/index.html',
+                'firstapp/main.html',
                 {'homeworks': homeworks}
             )
     context: dict = {
@@ -145,7 +156,7 @@ def login(request: WSGIRequest) -> HttpResponse:
         )
         return render(
             request,
-            'firstapp/index.html',
+            'firstapp/main.html',
             {'homeworks': homeworks}
         )
     return render(

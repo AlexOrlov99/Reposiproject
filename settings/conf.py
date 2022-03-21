@@ -34,7 +34,7 @@ SHELL_PLUS_MODEL_ALIASES = {
     },
     'firstapp': {
         'Student': 'S',
-        'File': 'F',
+        'File': 'FF',
         'Homework': 'H',
         'Group': 'G',
         'Professor': 'P',

@@ -1,11 +1,11 @@
-from django.contrib.auth.models import (
-    AbstractBaseUser, 
-    PermissionsMixin,
-)
 from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 
+from django.contrib.auth.models import (
+    AbstractBaseUser, 
+    PermissionsMixin,
+)
 from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
@@ -46,12 +46,14 @@ class CustomUserManager(BaseUserManager):
         
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
-        'Почта/Логин', unique=True
+        'Почта/логин', unique=True
     )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(default=timezone.now)
-
+    date_joined = models.DateTimeField(
+        verbose_name='Время регистрации',
+        default=timezone.now,
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
