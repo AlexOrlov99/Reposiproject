@@ -7,15 +7,21 @@ from django.conf.urls.static import static
 
 from firstapp.views import (
     IndexView,
+    AdminView,
+    ShowView,
+    DeleteView,
+    RegisterView,
+    LoginView,
+    LogoutView,
     )
 
 
 urlpatterns = [
-    path('',                    IndexView.as_view(), name='page_main'),
-    path('admin/',              views.admin),
-    path('show/<int:user_id>/', views.show,          name='page_show'),
-    path('delete/',              views.delete,       name='page_delete'),
-    path('register/',            views.register,     name='page_register'),
-    path('login/',               views.login,        name='page_login'),
-    path('logout/',              views.logout,       name='page_logout'),
+    path('',                       IndexView.as_view(),    name='page_main'        ),
+    path('admin/',                 AdminView.as_view()                             ),
+    path('show/<int:user_id>/',    ShowView.as_view(),     name='page_show'        ),
+    path('delete/<int:user_id>/',  DeleteView.as_view(),   name='page_delete'      ),
+    path('register/',              RegisterView.as_view(), name='page_register'    ),
+    path('login/',                 LoginView.as_view(),    name='page_login'       ),
+    path('logout/',                LogoutView.as_view(),   name='page_logout'      ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

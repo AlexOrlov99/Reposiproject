@@ -53,6 +53,7 @@ class StudentAdmin(admin.ModelAdmin):
         'account__full_name',
     )
     list_display = (
+        'user',
         'age',
         'gpa',
     )
