@@ -1,3 +1,4 @@
+from typing import Optional
 from multiprocessing import context
 from re import template
 from django.db.models import QuerySet
@@ -22,9 +23,13 @@ from firstapp.models import (
 )
 from django.views import View
 from django.template import loader
+from abstracts.mixins import HttpResponseMixin
+from abstracts.handlers import ViewHandler
 
 
-class IndexView(View):
+class IndexView(ViewHandler, View):
+
+    template_name: str = 'firstapp/main.html'
 
     def get(self,
         request: WSGIRequest,
@@ -32,107 +37,161 @@ class IndexView(View):
         **kwargs: dict,
         ) -> HttpResponse:
 
-        if not request.user.is_authenticated:
-            return render(
-                request,
-                'firstapp/login.html'
-                )
+        response: Optional[HttpResponse] = \
+            self.get_validated_response(
+                request
+            )
+        if response:
+            return response
+            
         homeworks: QuerySet = Homework.objects.filter(
             user=request.user,
             is_checked=False,
             )
+        
         context: dict = {
             'ctx_title': 'Главная страница',
             'ctx_homeworks': homeworks,
             }
-        template_name = loader.get_template(
-            'firstapp/main.html'
-        )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+    
+        return self.get_http_response(
+            request,
+            template_name,
+            context
         )
 
 
-class AdminView(View):
-
+class AdminView(ViewHandler, View):
+    
+    template_name: str = 'firstapp/admin.html'
+    
     def get(self,
         request: WSGIRequest,
         *args: tuple,
         **kwargs: dict,
         ) -> HttpResponse:
 
+        users: QuerySet = CustomUser.objects.filter(
+            is_active=True
+        )
         context: dict = {
             'ctx_title': 'Главная страница',
-            'ctx_users': CustomUser.objects.all(),
+            'ctx_users': users,
             }
-        template_name = loader.get_template(
-            'firstapp/admin.html'
-        )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
-        )        
 
-
-class ShowView(View):
-
-    def get(self,
-        request: WSGIRequest,
-        user_id: str,
-        *args: tuple,
-        **kwargs: dict,
-        ) -> HttpResponse:
         
-        user = CustomUser.objects.get(id=user_id)
-        context: dict = {
-            'ctx_title': 'Профиль пользователя',
-            'ctx_user': user,
-            }
-        template_name = loader.get_template(
-            'firstapp/show.html'
-        )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
-        )
+        
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )     
 
 
-class DeleteView(View):
+class ShowView(ViewHandler, View):
+
+    queryset: QuerySet = Homework.objects.get_not_deleted()
+
+    template_name: str ='firstapp/show.html'
 
     def get(self,
         request: WSGIRequest,
-        user_id: str,
         *args: tuple,
         **kwargs: dict,
         ) -> HttpResponse:
+        homework_id: int = kwargs.get('homework_id', 0)
+        
+        # user = CustomUser.objects.get(id=user_id)
+        homework: Optional[Homework] = None
 
-        user = CustomUser.objects.get(id=user_id)
-        user.delete()
+        try:
+            homework = self.queryset.get(id=homework_id)
 
-        context: dict = {
-            'ctx_title': 'Главная страница',
-            'ctx_users': CustomUser.objects.all(),
-            }
-            
-        template_name = loader.get_template(
-            'firstapp/admin.html'
+        except Homework.DoesNotExist:
+            return self. get_http_response(
+                request,
+                'firstapp/login.html'
+                )
+        else:
+            context: dict = {
+                'ctx_title': 'Профиль пользователя',
+                'ctx_homework': homework,
+                }
+        
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
         )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+class ShowView(ViewHandler, View):
+
+    queryset: QuerySet = Homework.objects.get_not_deleted()
+
+    template_name: str ='firstapp/show.html'
+
+    def get(
+        self, 
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs: dict
+    ):
+        homework_id: int = kwargs.get('homework_id', 0)
+        # user: User = CustomUser.objects.get(id=user_id)
+
+        homework: Optional[Homework] = None
+
+        try:
+            homework = self.queryset.filter(user=self.request.user)\
+                .get(id=homework_id)
+
+        except Homework.DoesNotExist:
+            return self.get_http_response(
+                request,
+                'firstapp/login.html'
+            )
+        else:
+            context: dict = {
+                'ctx_title': 'Домашние задания',
+                'ctx_homework': homework,
+            }
+
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context,
             )
 
+class DeleteUserView(ViewHandler, View):
 
-class RegisterView(View):
+    def get(self,
+        request: WSGIRequest,
+        user_id: int,
+        *args: tuple,
+        **kwargs: dict,
+        ) -> HttpResponse:
+
+        user = CustomUser.objects.get(id=user_id)
+        user.is_active = False
+        ctx_users: QuerySet = CustomUser.objects.filter(
+            is_active=True
+        )
+        print(ctx_users)
+
+        context: dict = {
+            'ctx_title': 'Главная страница',
+            'ctx_users': ctx_users,
+            }
+            
+        template_name: str = 'firstapp/admin.html'
+        
+        return self.get_http_response(
+            request,
+            template_name,
+            context
+        )    
+
+
+class RegisterView(ViewHandler, View):
 
     def get(self,
         request: WSGIRequest,
@@ -146,14 +205,12 @@ class RegisterView(View):
         context: dict = {
             'form': form
         }        
-        template_name = loader.get_template(
-            'firstapp/register.html'
-        )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+        template_name = 'firstapp/register.html'
+        
+        return self.get_http_response(
+            request,
+            template_name,
+            context
         )
 
     def post(self,
@@ -187,18 +244,16 @@ class RegisterView(View):
                 context: dict = {
                     'homeworks':homeworks
                 }
-                template_name = loader.get_template(
-                    'firstapp/main.html'
-                )
-                return HttpResponse(
-                    template_name.render(
-                        context, request
-                    ),
-                    content_type='text/html'
+                template_name: str = 'firstapp/main.html'
+                
+                return self.get_http_response(
+                    request,
+                    template_name,
+                    context
                 )
 
 
-class LoginView(View):
+class LoginView(ViewHandler, View):
 
     def get(self,
         request: WSGIRequest,
@@ -212,14 +267,13 @@ class LoginView(View):
         context: dict = {
             'form': form
         }        
-        template_name = loader.get_template(
-            'firstapp/login.html'
-        )
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+        
+        template_name: str = 'firstapp/login.html'
+        
+        return self.get_http_response(
+            request,
+            template_name,
+            context
         )
 
     def post(self,
@@ -255,18 +309,17 @@ class LoginView(View):
         context: dict = {
             'homeworks': homeworks
         }
-        template_name = loader.get_template(
-            'firstapp/main.html'
-        )        
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+       
+        template_name: str = 'firstapp/main.html'
+        
+        return self.get_http_response(
+            request,
+            template_name,
+            context
         )
 
 
-class LogoutView(View):
+class LogoutView(ViewHandler, View):
 
     def get(self,
         request: WSGIRequest,
@@ -282,12 +335,11 @@ class LogoutView(View):
         context: dict = {
             'form': form,
             }
-        template_name = loader.get_template(
-            'firstapp/login.html'
-        )       
-        return HttpResponse(
-            template_name.render(
-                context, request
-            ),
-            content_type='text/html'
+  
+        template_name: str = 'firstapp/login.html'
+
+        return self.get_http_response(
+            request,
+            template_name,
+            context
         )
