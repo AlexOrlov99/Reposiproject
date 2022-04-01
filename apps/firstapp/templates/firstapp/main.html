@@ -43,7 +43,7 @@
                                 {% if homework.user.is_superuser %}Admin{% else %}User{% endif %}
                             </span>
                         </div>
-                        <a class="edit"   href="{% url 'page_show' user.id %}" role="button">Профиль</a>
+                        <a class="edit"   href="{% url 'page_show' homework.id %}" role="button">Профиль</a>
                         <a class="delete" href=# role="button">Удалить</a>
                         <!-- <a class="delete" href="{% url 'page_delete' user.id %}" role="button">Удалить</a> -->
 

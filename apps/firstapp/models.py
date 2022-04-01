@@ -174,29 +174,6 @@ class Professor(AbstarctDateTime):
         verbose_name_plural = 'Преподователи'
 
 
-class FileQueryset(QuerySet):
-
-    def get_is_checked(self) -> QuerySet:
-        return self.filter(
-            homework__is_checked=True)
-
-
-class File(AbstarctDateTime):
-    title = models.CharField(
-        max_length=100,
-        verbose_name='Название',
-        )
-    file = models.FileField(
-        upload_to='homeworks/files/%Y/%m/%d',
-        verbose_name='Файл'
-    )
-    objects = FileQueryset().as_manager()
-
-    class Meta:
-        verbose_name = 'Вложенный файл'
-        verbose_name_plural = 'Вложенные файлы'
-
-
 class HomeworkQueryset(QuerySet):
 
     def get_not_deleted(self) -> QuerySet:
@@ -204,6 +181,13 @@ class HomeworkQueryset(QuerySet):
 
 
 class Homework(AbstarctDateTime):
+
+    IMAGE_TYPES =(
+        'png',
+        'jpg',
+        'img'
+    )
+
     user = models.ForeignKey(
         CustomUser, on_delete=models.PROTECT
     )
@@ -220,20 +204,60 @@ class Homework(AbstarctDateTime):
         verbose_name='Лого'
         )
 
-    is_checked = models.BooleanField(
-        default = False,
-    )
-    files = models.ForeignKey(
-        File, on_delete=models.PROTECT
-    )
     objects = HomeworkQueryset().as_manager()
+
+
+    @property
+    def is_checked():
+        return all(
+            self.files.values_list(
+                'is_checked', flat=True
+            )
+        )
 
     def __str__(self) -> str:
         return f'{self.subject} | {self.title}'
 
+
     class Meta:
         ordering = (
-            'datatime_created',
+            'datetime_created',
         )
         verbose_name = 'Домашнее задание'
         verbose_name_plural = 'Домашние задания'
+
+
+class FileQueryset(QuerySet):
+
+    def get_is_checked(self) -> QuerySet:
+        return self.filter(
+            is_checked=True)
+
+
+class File(AbstarctDateTime):
+
+    FILE_TYPES =(
+        'png',
+        'jpg',
+        'img'
+    )
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Название',
+        )
+    file = models.FileField(
+        upload_to='homeworks/files/%Y/%m/%d',
+        verbose_name='Файл',
+    )
+    homework = models.ForeignKey(
+        Homework, on_delete=models.PROTECT,
+        related_name = 'files',
+    )
+    is_checked = models.BooleanField(
+        default = False,
+    )
+    objects = FileQueryset().as_manager()
+
+    class Meta:
+        verbose_name = 'Вложенный файл'
+        verbose_name_plural = 'Вложенные файлы'
