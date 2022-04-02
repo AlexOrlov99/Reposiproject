@@ -9,6 +9,7 @@ from firstapp.views import (
     IndexView,
     HomeworkCreateView,
     HomeworkDetailsView,
+    HomeworkFilesView,
     AdminView,
     ShowView,
     DeleteUserView,
@@ -20,14 +21,15 @@ from firstapp.views import (
 
 
 urlpatterns = [
-    path('',                            IndexView.as_view(),            name='page_main'            ),
-    path('create/',                     HomeworkCreateView.as_view(),   name='page_homework_create' ),
-    path('detail/<int:homework_id>/',   HomeworkDetailsView.as_view(),  name='page_homework_detail' ),
-    path('admin/',                      AdminView.as_view()                                         ),
-    path('show/<int:homework_id>/',     ShowView.as_view(),             name='page_show'            ),
-    path('delete/<int:user_id>/',       DeleteUserView.as_view(),       name='page_delete'          ),
-    path('register/',                   RegisterView.as_view(),         name='page_register'        ),
-    path('login/',                      LoginView.as_view(),            name='page_login'           ),
-    path('logout/',                     LogoutView.as_view(),           name='page_logout'          ),
+    path('',                                IndexView.as_view(),            name='page_main'            ),
+    path('create/',                         HomeworkCreateView.as_view(),   name='page_homework_create' ),
+    path('detail/<int:ctx_homework_id>/',   HomeworkDetailsView.as_view(),  name='page_homework_detail' ),
+    path('homework_files/<str:filter_by>',  HomeworkFilesView.as_view(),    name='page_homework_files'  ),
+    path('admin/',                          AdminView.as_view(),                                        ),
+    path('show/<int:homework_id>/',         ShowView.as_view(),             name='page_show'            ),
+    path('delete/<int:user_id>/',           DeleteUserView.as_view(),       name='page_delete'          ),
+    path('register/',                       RegisterView.as_view(),         name='page_register'        ),
+    path('login/',                          LoginView.as_view(),            name='page_login'           ),
+    path('logout/',                         LogoutView.as_view(),           name='page_logout'          ),
     
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -47,7 +47,6 @@ class IndexView(ViewHandler, View):
             
         homeworks: QuerySet = Homework.objects.filter(
             user=request.user,
-            is_checked=False,
             )
         
         context: dict = {
@@ -71,22 +70,21 @@ class HomeworkDetailsView(ViewHandler, View):
     def get(
         self,
         request: WSGIRequest,
-        homework_id: int, 
         *args: tuple,
         **kwargs: dict
         ) -> HttpResponse:
         
-        homework = self.queryset.filter(user=self.request.user)\
-                .get(id=homework_id)
+        homework = self.queryset.filter(user=self.request.user)
 
         context: dict = {
             'homework': homework
         }
+        print(context)
         return self.get_http_response(
             request,
             self.template_name,
             context
-        )        
+            )        
 
 
 class HomeworkCreateView(ViewHandler, View):
@@ -167,6 +165,10 @@ class HomeworkCreateView(ViewHandler, View):
             'firstapp/homework_detail.html',
             context
             )                                        
+
+
+class HomeworkFilesView(ViewHandler, View):
+    pass
 
 
 class AdminView(ViewHandler, View):

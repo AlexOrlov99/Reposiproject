@@ -206,7 +206,6 @@ class Homework(AbstarctDateTime):
 
     objects = HomeworkQueryset().as_manager()
 
-
     @property
     def is_checked():
         return all(
@@ -245,12 +244,14 @@ class File(AbstarctDateTime):
         max_length=100,
         verbose_name='Название',
         )
-    file = models.FileField(
+    obj = models.FileField(
         upload_to='homeworks/files/%Y/%m/%d',
         verbose_name='Файл',
     )
     homework = models.ForeignKey(
-        Homework, on_delete=models.PROTECT,
+        Homework, 
+        verbose_name='Домашняя работа',
+        on_delete=models.PROTECT,
         related_name = 'files',
     )
     is_checked = models.BooleanField(
