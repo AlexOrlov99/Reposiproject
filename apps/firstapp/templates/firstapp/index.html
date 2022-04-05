@@ -2,12 +2,12 @@
 {% block homeworks_active %}active{% endblock %}
 
 {% block body %}
-<div class="albums-container container-fluid">
+<div class="homeworks-container container-fluid">
 
     <!-- Домашние работы -->
     <div class="row">
         <div class="col-sm-12">
-            <h3>{{ user.email }}</h3>
+            <h3>{{ ctx_user.email }}</h3>
         </div>
         {% if ctx_homeworks %}
             {% for homework in ctx_homeworks %}
@@ -23,7 +23,7 @@
                             <!-- Детали -->
                             <a href="{% url 'page_homework_detail' homework.id %}" class="btn btn-primary btn-sm" role="button">Детали</a>
 
-                            <!-- Удалить -->
+                            <!-- Удаление -->
                             <form action="{% url 'page_homework_delete' homework.id %}" method="post" style="display: inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="homework_id" value="{{ homework.id }}" />
@@ -33,7 +33,7 @@
                             </form>
 
                             <!-- Проверенные -->
-                            <a href="{% url 'page_homework_file_checked' homework.id %}" class="btn btn-default btn-sm btn-favorite" role="button">
+                            <a href="{% url 'page_homework_files_check' homework.id %}" class="btn btn-default btn-sm btn-checked" role="button">
                                 <span class="glyphicon glyphicon-ok {% if homework.is_checked %}active{% endif %}"></span>
                             </a>
                         </div>
@@ -91,10 +91,18 @@
                                             <a href="{% url 'page_homework_detail' file.homework.id %}">{{ file.homework.title }}</a>
                                         </td>
                                         <td>
-                                            <a href="{% url 'checked' file.id %}" class="btn-favorite">
+                                            <a href="{% url 'checked' file.id %}" class="btn-checked">
                                                 <span class="glyphicon glyphicon-ok {% if file.is_checked %}active{% endif %}"></span>
                                             </a>
                                         </td>
                                     </tr>
                                 {% endfor %}
-                            </tbody>... (осталось: 6 кб)
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

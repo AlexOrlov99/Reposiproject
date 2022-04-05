@@ -1,13 +1,15 @@
-{% extends 'firstapp/base.html' %}
-{% block title %}Регистрация{% endblock %}
+{% extends 'firtapp/base_visitor.html' %}
+{% block ctx_title %}Регистрация{% endblock %}
 {% block register_active %}active{% endblock %}
 
 {% block body %}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12 col-md-6">
             <div class="panel panel-default">
                 <div class="panel-body">
+
                     <h3>Регистрация аккаунта</h3>
 
                     {% if error_message %}
@@ -18,7 +20,7 @@
 
                         {% csrf_token %}
 
-                        {% include 'firstapp/form_template.html' %}
+                        {% include 'university/form_template.html' %}
 
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">

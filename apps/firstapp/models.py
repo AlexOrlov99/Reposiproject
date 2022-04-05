@@ -1,19 +1,11 @@
-from datetime import (
-    datetime,
-)
-from django.db import (
-    models,
-)
-from django.db.models import (
-    QuerySet,
-)
-from django.core.exceptions import(
-    ValidationError,
-)
-# from django.contrib.auth.models import User
+from datetime import datetime
+
+from django.db import models
+from django.db.models import QuerySet
+from django.core.exceptions import ValidationError
+
 
 from abstracts.models import AbstarctDateTime
-
 from auths.models import CustomUser
 
 
@@ -31,11 +23,13 @@ class Group(AbstarctDateTime):
     GROUP_NAME_MAX_LENGTH = 10
 
     name = models.CharField(
+        verbose_name='Имя',
         max_length = GROUP_NAME_MAX_LENGTH
     )
     objects = GroupQuerySet().as_manager()
+
     def __str__(self) -> str:
-        return f'Group: {self.name}'
+        return f'Группа: {self.name}'
 
     class Meta:
         ordering = (
@@ -56,8 +50,11 @@ class StudentQuerySet(QuerySet):
 
 class Student(AbstarctDateTime):
     MAX_AGE = 27
+
     user = models.OneToOneField(
-        CustomUser, on_delete=models.PROTECT
+        CustomUser,
+        verbose_name='пользователь',
+        on_delete=models.PROTECT
     )
     age = models.IntegerField(
         'Возраст студента', 
@@ -66,15 +63,20 @@ class Student(AbstarctDateTime):
         'Средний бал'
     )
     group = models.ForeignKey(
-        Group, on_delete=models.PROTECT
+        Group, 
+        verbose_name='группа',
+        on_delete=models.PROTECT
     )
     objects = StudentQuerySet().as_manager()
 
 
     def __str__(self) -> str:
-        return f'Student: {self.user}, {self.age}, \
-            {self.gpa}, {self.group.name}'
-    
+        return 'Студент: {0} / {1} / {2}'.format(
+            self.user.email,
+            self.age,
+            self.gpa,
+        )
+
     def save(self,
         *args: tuple,
         **kwargs: dict
@@ -87,22 +89,17 @@ class Student(AbstarctDateTime):
         super().save(*args, **kwargs)
     
     def delete(self) -> None:
-        breakpoint()
-
         datetime_now: datetime = datetime_now()
 
         self.save(
             update_fields=['datetmie_deleted']
         )
-        super().delete()
+        # super().delete()
 
 
     class Meta:
         ordering = (
-            'user',
-            'age',
-            'group',
-            'gpa'
+            'gpa',
         )
         verbose_name = 'Студент'
         verbose_name_plural = 'Стундеты'
@@ -135,9 +132,6 @@ class Professor(AbstarctDateTime):
         (TOPIC_PERL, 'Perl')
     )
 
-    user = models.OneToOneField(
-        CustomUser, on_delete=models.PROTECT
-    )
     full_name = models.CharField(
         verbose_name='Полное имя',
         max_length=FULL_NAME_MAX_LENGTH
@@ -167,11 +161,10 @@ class Professor(AbstarctDateTime):
     
     class Meta:
         ordering = (
-            'full_name',
             'topic',
         )
-        verbose_name = 'Преподователь'
-        verbose_name_plural = 'Преподователи'
+        verbose_name = 'Проффессор'
+        verbose_name_plural = 'Проффессора'
 
 
 class HomeworkQueryset(QuerySet):
@@ -185,38 +178,37 @@ class Homework(AbstarctDateTime):
     IMAGE_TYPES =(
         'png',
         'jpg',
-        'img'
+        'jpeg'
     )
 
     user = models.ForeignKey(
-        CustomUser, on_delete=models.PROTECT
+        CustomUser,
+        verbose_name='загрузчик',
+        on_delete=models.PROTECT
     )
     title = models.CharField(
         max_length=100,
-        verbose_name='Название',
+        verbose_name='Заголовок',
         )
     subject = models.CharField(
         max_length=100,
-        verbose_name='Предмет',
+        verbose_name='Топик',
         )
     logo = models.ImageField(
-        upload_to='homeworks/logos/%Y/%m/%d',
-        verbose_name='Лого'
+        upload_to='homeworks/logos/%Y%m%d',
+        verbose_name='Лого',
+        max_length=255
         )
 
     objects = HomeworkQueryset().as_manager()
 
     @property
-    def is_checked():
+    def is_checked(self) -> bool:
         return all(
             self.files.values_list(
                 'is_checked', flat=True
             )
         )
-
-    def __str__(self) -> str:
-        return f'{self.subject} | {self.title}'
-
 
     class Meta:
         ordering = (
@@ -228,24 +220,22 @@ class Homework(AbstarctDateTime):
 
 class FileQueryset(QuerySet):
 
-    def get_is_checked(self) -> QuerySet:
-        return self.filter(
-            is_checked=True)
+    def get_not_deleted(self) -> QuerySet:
+        return self.filter(datetime_deleted__isnull=True)
 
 
 class File(AbstarctDateTime):
 
     FILE_TYPES =(
-        'png',
-        'jpg',
-        'img'
+        'txt',
+        'pdf'
     )
     title = models.CharField(
         max_length=100,
-        verbose_name='Название',
+        verbose_name='Заголовок',
         )
     obj = models.FileField(
-        upload_to='homeworks/files/%Y/%m/%d',
+        upload_to='homeworks/files/%Y%m%d',
         verbose_name='Файл',
     )
     homework = models.ForeignKey(
@@ -255,10 +245,17 @@ class File(AbstarctDateTime):
         related_name = 'files',
     )
     is_checked = models.BooleanField(
+        verbose_name='Проверен',
         default = False,
     )
     objects = FileQueryset().as_manager()
 
+    def __str__(self) -> str:
+        return f'{self.homework.title} | {self.title}'
+
     class Meta:
-        verbose_name = 'Вложенный файл'
-        verbose_name_plural = 'Вложенные файлы'
+        ordering =(
+            '-datetime_created',
+        )
+        verbose_name = 'Файл'
+        verbose_name_plural = 'Файлы'

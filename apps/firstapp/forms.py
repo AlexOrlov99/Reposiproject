@@ -1,18 +1,12 @@
 from django import forms
 
-from firstapp.models import Homework
+from firstapp.models import (
+    Homework,
+    File,
+    )
 
 
 class HomeworkForm(forms.ModelForm):
-    title = forms.CharField(
-        label='Название',
-        )
-    subject = forms.CharField(
-        label='Предмет',
-    )
-    logo = forms.ImageField(
-        label='Лого',
-    )
 
     class Meta:
         model = Homework
@@ -20,4 +14,14 @@ class HomeworkForm(forms.ModelForm):
             'title',
             'subject',
             'logo',
+        )
+
+class FileForm(forms.ModelForm):
+
+    class Meta:
+        model = File
+        fields = (
+            'title',
+            'obj',
+            'is_checked',
         )
