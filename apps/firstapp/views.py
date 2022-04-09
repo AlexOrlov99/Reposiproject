@@ -1,170 +1,618 @@
-from re import template
-from django.db.models import QuerySet
+from typing import Optional
+from django.db.models import (
+    QuerySet,
+    Q
+    )
+
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
+from django.shortcuts import (
+    render,
+    get_object_or_404,
+    )
 from django.contrib.auth import (
     authenticate as dj_authenticate,
     login as dj_login,
     logout as dj_logout,
 )
-from django import forms
-from django.shortcuts import render
-from apps.auths.forms import CustomUserForm
+from django.views import View
 
+from abstracts.handlers import ViewHandler
+from auths.forms import CustomUserForm
 from auths.models import CustomUser
-
 from firstapp.models import (
-    Group,
-    Student,
-    Professor,
-    Homework
+    Homework,
+    File,
 )
-
-
-def index(request: WSGIRequest) -> HttpResponse:
-
-    if not request.user.is_authenticated:
-        return render(
-            request,
-            'firsapp/login.html'
-        )
-    homeworks: QuerySet = Homework.objects.filter(
-        user=request.user
-    )
-    context: dict = {
-        'ctx_title': 'Главная страница',
-        'ctx_homeworks': homeworks,
-    }
-    return render(
-        request,
-        template_name='firstapp/index.html',
-        context=context
+from firstapp.forms import (
+    HomeworkForm,
+    FileForm,
     )
 
-def index_2(request: WSGIRequest) -> HttpResponse:
-    return HttpResponse(
-        '<h1>Page: Start</h1>'
-    )
 
-def admin(request: WSGIRequest) -> HttpResponse:
-    context: dict = {
-        'ctx_title': 'Главная страница',
-        'ctx_users': CustomUser.objects.all(),
-    }
+class IndexView(ViewHandler, View):
+
+    queryset: QuerySet = Homework.objects.get_not_deleted()    
+    template_name: str = 'firstapp/index.html'
     
-    return render(
-        request,
-        'admin.html',
-        context
-    )
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs: dict,
+        ) -> HttpResponse:
 
-def show(request: WSGIRequest, user_id: str) -> HttpResponse:
-    user = CustomUser.objects.get(id=user_id)
-    context: dict = {
-        'ctx_title': 'Профиль пользователя',
-        'ctx_user': user,
-    }
-    return render(
-        request,
-        'show.html',
-        context
-    )
+        response: Optional[HttpResponse] = self.get_validated_response(
+            request
+        )
+        if response:
+            return response
+            
+        homeworks: QuerySet = self.queryset.filter(
+            user=request.user,
+            )
+        query: str = request.GET.get(
+            'query',''
+        )
+        if query:
+            homeworks = homeworks.filter(
+                Q(title__icontains=query) |
+                Q(subject__icontains=query)
+            )
+        if not homeworks:
+            homeworks = self.queryset
 
-def delete(request: WSGIRequest) -> HttpResponse:
+        return self.get_http_response(
+            request,
+            template_name=self.template_name,
+            context= {
+                'ctx_title': 'Главная страница',
+                'ctx_homeworks': homeworks,
+                'ctx_user': request.user,
+            }
+        )
 
- return HttpResponse(
-        '<h1>Page: Delete</h1>'
-    )
 
-def register(request: WSGIRequest) -> HttpResponse:
+class ShowView(ViewHandler, View):
 
-    form: CustomUserForm = CustomUserForm(
-        request.POST
-    )
-    if form.is_valid():
-        user: CustomUser = form.save(
+    queryset: QuerySet = Homework.objects.get_not_deleted()
+    template_name: str ='firstapp/user_profile.html'
+
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs: dict,
+        ) -> HttpResponse:
+        homework_id: int = kwargs.get('homework_id', 0)
+
+        homework: Optional[CustomUser] = None
+
+        try:
+            homework = self.queryset.filter(
+            user=request.user
+            ).get(id=homework_id)
+
+        except Homework.DoesNotExist:
+            return self. get_http_response(
+                request,
+                'firstapp/index.html'
+                )
+        else:
+            context: dict = {
+                'ctx_title': 'Профиль пользователя',
+                'ctx_homework': homework,
+                }
+        
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )
+
+
+class HomeworkDetailView(ViewHandler, View):
+    """Homework Detail View."""
+
+    template_name: str ='firstapp/homework_detail.html'    
+
+    def get(
+        self,
+        request: WSGIRequest,
+        homework_id: int,
+        *args: tuple,
+        **kwargs: dict
+        ) -> HttpResponse:
+        
+        response: Optional[HttpResponse] = \
+            self.get_validated_response(
+                request
+            )
+        if response:
+            return response
+
+        homework: Homework = get_object_or_404(
+            Homework,
+            pk=homework_id,
+        )
+
+        return self.get_http_response(
+            request,
+            template_name=self.template_name,
+            context={
+                'ctx_homework': homework,
+            }
+        )        
+
+
+class HomeworkCreateView(ViewHandler, View):
+    """Homework Create View."""
+    form: HomeworkForm = HomeworkForm
+    template_name: str = 'firstapp/homework_create.html'    
+
+    def get(
+        self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs: dict
+        ) -> HttpResponse:
+        """GET request handler."""
+
+        response: Optional[HttpResponse] = \
+            self.get_validated_response(
+                request
+            )
+        if response:
+            return response
+
+        return self.get_http_response(
+            request,
+            template_name=self.template_name,
+            context= {
+                'ctx_form': self.form,
+            }
+        )       
+    
+    def post(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+
+        _form: HomeworkForm = self.form(
+            request.POST or None,
+            request.FILES or None
+            )
+        if not _form.is_valid():
+            context: dict = {
+                'ctx_form': _form,
+                }
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context
+                )            
+        homework: Homework = _form.save(
+            commit=False
+            )
+        homework.user = request.user
+        homework.logo = request.FILES['logo']
+
+        file_type: str = homework.logo.url.split('.')[-1].lower()
+
+        if file_type not in Homework.IMAGE_TYPES:
+
+            context: dict = {
+                'ctx_form': _form,
+                'ctx_homework': homework,
+                'error_message': 'PNG, JPG, JPEG',
+                }
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context
+                )
+        homework.save()
+
+        context: dict = {
+            'ctx_homework': homework
+        }
+        return self.get_http_response(
+            request,
+            template_name='firstapp/homework_detail.html',
+            context=context
+            )    
+
+
+class HomeworkDeleteView(ViewHandler, View):
+    """Homework Delete View."""
+
+    template_name: str = 'firstapp/index.html'       
+
+    def post(
+        self,
+        request: WSGIRequest,
+        homework_id: int,
+        *args: tuple,
+        **kwargs: dict,
+    ) -> HttpResponse:
+        """POST request handler."""
+        homework = Homework.objects.get(id=homework_id)
+        homework.delete()
+        homework = Homework.objects.filter(user=request.user)
+
+        context: dict = {
+            'ctx_homework': homework
+        }
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context,
+        )
+
+
+class HomeworkFilesCheckView(ViewHandler, View):
+    """Homework Files Check View."""
+
+    def get(
+        self,
+        request: WSGIRequest,
+        file_id: int,
+        *args: tuple,
+        **kwargs: dict
+    ) -> HttpResponse:
+        """POST request handler."""
+
+        from django.http import JsonResponse
+
+        file: File = get_object_or_404(
+            File, id=file_id
+        )
+        try:
+            if file.is_checked:
+                file.is_checked = False
+            else:
+                file.is_checked = True
+            file.save()
+        
+        except(KeyError, File.DoesNotExist):
+            return JsonResponse(
+                {'success': False}
+            )
+        return JsonResponse(
+            {'success': True}
+        )
+
+
+class HomeworkFilesDeleteView(ViewHandler, View):
+     """Homework Files Delete View."""
+
+     template_name: str = 'firstapp/homework_detail.html'
+
+     def post(
+         self,
+         request: WSGIRequest,
+         homework_id: int,
+         file_id: int,
+         *args: tuple,
+         **kwargs: dict,
+     ) -> HttpResponse:
+        """Homework Files Delete View."""
+        homework: Homework = get_object_or_404(
+            Homework,
+            id=1
+        )
+        file: File = Homework.objects.get(
+            id=file_id
+        )
+        file.delete()
+
+        return self.get_http_response(
+            request,
+            template_name=self.template_name,
+            context={
+                'ctx_homework': homework
+            }
+        )
+
+
+class HomeworkFilesView(ViewHandler, View):
+    """Homework Files View."""
+
+    queryset: QuerySet = Homework.objects.get_not_deleted()
+    template_name: str = 'firstapp/homework_files.html'
+
+    def get(
+        self,
+        request: WSGIRequest,
+        filter_by: str,
+        *args: tuple,
+        **kwargs: dict
+    ) -> HttpResponse:
+        """GET request handler."""
+
+        if not request.user.is_authenticated:
+            return self.get_hhtp_response(
+                request,
+                'firstapp/user_login.html'
+            )
+        files: list = []
+        try:
+            file_ids: list = []
+            homework: Homework
+            for homework in self.queryset.filter(
+                user=request.user
+                ):
+                file: File
+                for file in homework.files.get_not_deleted():
+                    file_ids.append(file.id)
+            
+            files: QuerySet = File.objects.filter(
+                id__in=file_ids
+            )
+            if filter_by == 'checked':
+                files=files.filter(
+                    is_checked=True
+                )
+        except Homework.DoesNotExist:
+            pass
+
+        context: dict = {
+            'ctx_files': files,
+            'ctx_filter_by': filter_by,
+        }
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )
+
+
+class HomeworkFilesCreateView(ViewHandler, View):
+    """Homework Files Create View."""
+    
+    queryset: QuerySet = Homework.objects.get_not_deleted()
+    form: FileForm = FileForm
+    template_name: str = 'firstapp/homework_files_create.html' 
+
+    # def get(
+    #     self,
+    #     request: WSGIRequest,
+    #     *args: tuple,
+    #     **kwargs: dict
+    #     ) -> HttpResponse:
+    #     """GET request handler."""
+    #     _form: FileForm = self.form(
+    #         request.POST or None,
+    #         request.FILES or None
+    #     )
+    #     return self.get_http_response(
+    #         request,
+    #         template_name=self.template_name,
+    #         context= {
+    #             'ctx_form': _form,
+    #         }
+    #     )   
+    def post(
+        self,
+        request: WSGIRequest,
+        homework_id: int,
+        *args: tuple,
+        **kwargs: dict,
+    ) -> HttpResponse:
+        """POST request handler."""
+        _form: FileForm = self.form(
+            request.POST or None,
+            request.FILES or None
+        )
+        homework: Homework = get_object_or_404(
+            Homework,
+            id=homework_id
+        )
+        if not _form.is_valid():
+            context: dict = {
+                'ctx_form': _form,
+                'ctx_homework': homework
+            }
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context
+            )
+        files = homework.files.get_not_deleted()
+        form_title: str = _form.cleaned_data.get('title')
+
+        file: File
+        for file in files:
+            if file.title != form_title:
+                continue
+
+            context: dict = {
+                'ctx_homework': homework,
+                'ctx_form': _form,
+                'error_message': 'Файл уже добавлен'
+            }
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context
+            )
+        file: File = _form.save(
             commit=False
         )
+        file.homework = homework
+        file.obj = request.FILES['obj']
+        file_type: str = file.obj.url.split('.')[-1].lower()
+
+        if file_type not in File.File_TYPES:
+            context: dict ={
+                'ctx_homework': homework,
+                'ctx_form': _form,
+                'error_message': 'TXT, PDF',
+            }
+            return self.get_http_response(
+                request,
+                self.template_name,
+                context
+            )
+        file.save()
+
+        context: dict = {
+            'ctx_homework': homework,
+        }
+
+        return self.get_http_response(
+            request=request,
+            template_name='firstapp/homework_detail.html',
+            context={
+                'ctx_homework': homework,
+            }
+        )
+ 
+
+class RegisterView(ViewHandler, View):
+    """Register View."""   
+
+    template_name = 'firstapp/user_register.html'
+
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )
+
+    def post(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+        """POST request handler."""
+
+        form: CustomUserForm = CustomUserForm(
+            request.POST
+            )        
+        if not form.is_valid():
+            return render(
+                request,
+                self.template_name,
+                {'ctx_form': form}
+            )
+
+        user: CustomUser = form.save(
+                commit=False
+                )
         email: str = form.cleaned_data['email']
         password: str = form.cleaned_data['password']
         user.email = email
         user.set_password(password)
         user.save()
-
         user: CustomUser = dj_authenticate(
             email=email,
             password=password
         )
         if user and user.is_active:
-
             dj_login(request, user)
 
             homeworks: QuerySet = Homework.objects.filter(
                 user=request.user
             )
-            return render(
+            
+            return self.get_http_response(
                 request,
                 'firstapp/index.html',
                 {'homeworks': homeworks}
             )
-    context: dict = {
-        'form': form
-    }
-    return render(
-        request,
-        'firstapp/register.html',
-        context
-    )
 
-def login(request: WSGIRequest) -> HttpResponse:
 
-    if request.method == 'POST':
-        email: str = request.POST['email']
+class LoginView(ViewHandler, View):
+    """Login View."""
+
+    template_name: str = 'firstapp/user_login.html'
+
+    def get(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+        """GET request handler."""
+
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )
+
+    def post(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+        """POST request handler."""
+
+        email: str = request.POST['username']
         password: str = request.POST['password']
 
         user: CustomUser = dj_authenticate(
-            email=email,
+            username=email,
             password=password
         )
         if not user:
             return render(
                 request,
-                'firstapp/login.html',
+                self.template_name,
                 {'error_message': 'Невереные данные'}
             )
         if not user.is_active:
             return render(
                 request,
-                'firstapp/login.html',
+                self.template_name,
                 {'error_message': 'Ваш аккаунт был удален'}
             )
+           
         dj_login(request, user)
 
         homeworks: QuerySet = Homework.objects.filter(
             user=request.user
         )
-        return render(
+        context: dict = {
+            'ctx_title': 'Домашние работы',
+            'homeworks': homeworks
+        }
+    
+        return self.get_http_response(
             request,
-            'firstapp/index.html',
-            {'homeworks': homeworks}
+            self.template_name,
+            context
         )
-    return render(
-        request,
-        'firstapp/login.html'
-    )
 
-def logout(request: WSGIRequest) -> HttpResponse:
 
-    dj_logout(request)
+class LogoutView(ViewHandler, View):
+    """Logout View."""    
 
-    form: CustomUserForm = CustomUserForm(
-        request.POST
-    )
-    context: dict = {
-        'form': form,
-    }
-    return render(
-        request,
-        'firstapp/login.html',
-        context
-    )
+    template_name: str = 'firstapp/user_login.html'
+
+    def post(self,
+        request: WSGIRequest,
+        *args: tuple,
+        **kwargs
+        ) -> HttpResponse:
+        """POST request handler."""
+
+        dj_logout(request)
+
+        form: CustomUserForm = CustomUserForm(
+            request.POST
+            )
+        context: dict = {
+            'form': form,
+            }
+  
+        return self.get_http_response(
+            request,
+            self.template_name,
+            context
+        )

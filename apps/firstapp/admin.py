@@ -33,17 +33,17 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
+        'datetime_created',
+        'datetime_updated',
+        'datetime_deleted',
         )
 
 
 class StudentAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
+        'datetime_created',
+        'datetime_updated',
+        'datetime_deleted',
         )
     list_filter = (
         'age',
@@ -53,6 +53,7 @@ class StudentAdmin(admin.ModelAdmin):
         'account__full_name',
     )
     list_display = (
+        'user',
         'age',
         'gpa',
     )
@@ -80,25 +81,25 @@ class StudentAdmin(admin.ModelAdmin):
 
 class ProfessorAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
+        'datetime_created',
+        'datetime_updated',
+        'datetime_deleted',
         )
 
 
 class FileAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
+        'datetime_created',
+        'datetime_updated',
+        'datetime_deleted',
         )
-
+    
 
 class HomeworkAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'datatime_created',
-        'datatime_updated',
-        'datatime_deleted',
+        'datetime_created',
+        'datetime_updated',
+        'datetime_deleted',
         )
 
 

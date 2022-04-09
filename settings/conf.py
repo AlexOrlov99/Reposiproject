@@ -21,6 +21,10 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
+#----------------------------------------------------------
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # ---------------------------------------------------------
 SHELL_PLUS_PRE_IMPORTS = [
     ('django.db', ('connection', 'reset_queries', 'connections')),
@@ -34,7 +38,7 @@ SHELL_PLUS_MODEL_ALIASES = {
     },
     'firstapp': {
         'Student': 'S',
-        'File': 'F',
+        'File': 'FF',
         'Homework': 'H',
         'Group': 'G',
         'Professor': 'P',
